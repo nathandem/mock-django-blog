@@ -1,0 +1,62 @@
+{% extends "blog/base.html" %}
+{% block content %}
+
+<!-- top of the article: date published or possibility to publish if it's a draft -->
+<h1 class="posttile loader">{{post.title}}</h1>
+{% if post.published_date %}
+  <div class="date postdate">
+    {{ post.published_date }}
+  </div>
+{% else %}
+  <a class="btn btn-default" href="{% url 'post_publish' pk=post.pk %}">Publish</a>
+{% endif %}
+
+<!-- let's view the text of the post -->
+<p class="postcontent">{{post.text|safe|linebreaks}}</p>
+
+<!-- buttons to edit and remove the post (for auth users) -->
+{% if user.is_authenticated %}
+  <a class="btn btn-primary" href="{% url 'post_edit' pk=post.pk %}">
+    <span class="glyphicon glyphicon-pencil"></span>
+  </a>
+  <a class="btn btn-primary" href="{% url 'post_remove' pk=post.pk %}">
+    <span class="glyphicon glyphicon-remove"></span>
+  </a>
+{% endif %}
+
+<!-- comments -->
+<hr>
+<a class="btn btn-primary btn-comment" href="{% url 'add_comment_to_post' pk=post.pk %}">Add comment</a>
+
+<div class="container">
+  <!-- post.comments.all is a ForeignKey connection btw Post and Comment -->
+  <!-- because comments is the "many" side of this one-to-many relation, there's a ".all" at the end of post.comments.all -->
+  {% for comment in post.comments.all %}
+    <br>
+    {% if user.is_authenticated or comment.approved_comment %}
+
+    <!-- this strange condition takes care of the cases of auth users and non-auth users -->
+      {{comment.create_date}}
+
+      <!-- unlike in PostListView, the display logic takes place in the template (and not a QuerySet) -->
+      <!-- this is because post_detail.html is a view constructed with a built-in generic view around the Post model -->
+
+      {% if not comment.approved_comment %}
+        <a class="btn btn-default" href="{% url 'comment_remove' pk=comment.pk %}">
+          <span class="glyphicon glyphicon-remove"></span>
+        </a>
+        <a class="btn btn-primary" href="{% url 'comment_approve' pk=comment.pk %}">
+          <span class="glyphicon glyphicon-ok"></span>
+        </a>
+      {% endif %}
+
+      <p>{{comment.text|safe|linebreaks}}</p>
+      <p>Posted by: {{comment.author}}</p>
+    {% endif %}
+    {% empty %}
+    <p>No comments</p>
+  {% endfor %}
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+
+<div class="centerstage">
+  {% for comment in comment_list %}
+  <div id="comment_approve">
+    <p>Comment: {{ comment.text }}</p>
+    <p>Author: {{ comment.author }}</p>
+    <p>Context: <a href="{% url 'post_detail' pk=comment.post.pk %}">{{comment.post.title}}</a></p>
+
+    <!-- approve and remove buttons -->
+    <p>Approve or reject?
+    <a class="btn btn-primary btn-size" href="{% url 'comment_approve' pk=comment.pk %}">
+      <span class="glyphicon glyphicon-ok"></span>
+    </a>
+    <a class="btn btn-default btn-size" href="{% url 'comment_remove' pk=comment.pk %}">
+      <span class="glyphicon glyphicon-remove"></span>
+    </a>
+    </p>
+
+    <p>Create date: {{ comment.create_date }}</p>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
